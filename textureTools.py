@@ -39,6 +39,7 @@ def Character_Item_Callback(self, context):
         ("BKN", "Baiken", ""),
         ("CHP", "Chipp", ""),
         ("COS", "Happy Chaos", ""),
+        ("DZY", "Dizzy", ""),
         ("ELP", "Elphelt", ""),
         ("FAU", "Faust", ""),
         ("GIO", "Giovanna", ""),
