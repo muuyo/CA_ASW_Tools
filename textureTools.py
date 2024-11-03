@@ -305,10 +305,31 @@ def ApplyTextures(context, meshObj, TexDrop, CharDrop, TexTypeDrop, BoolShader):
                 map = UVMap = mat.node_tree.nodes.new("ShaderNodeUVMap")
                 out = mat.node_tree.nodes["Material Output"]
 
+                
+
+                BaseTex.location = (-500, 600)
+                SssTex.location = (-500,300)
+                ILMTex.location = (-500,0)
+                DetailTex.location = (-500,-300)
+                map.location = (-700,-350)
+
                 map.uv_map = "UVMap.001"
 
-                mat.node_tree.links.new(Arc.outputs['Color'], out.inputs['Surface'])
-
+                mat.node_tree.links.new(Arc.outputs['Shader'], out.inputs['Surface'])
+                
+                # LerpTex = mat.node_tree.nodes.new('ShaderNodeTexImage')
+                # Lerp = mat.node_tree.nodes.new('ShaderNodeMix')
+                # mat.node_tree.links.new(LerpTex.outputs['Color'], Lerp.inputs[2])
+                # mat.node_tree.links.new(LerpTex.outputs['Alpha'], Lerp.inputs[0])
+                # mat.node_tree.links.new(BaseTex.outputs['Color'], Lerp.inputs[1])
+                # LerpTex.label = '[LERP] Image for drawing onto model (use in Photoshop as mask)'
+                # Lerp.label = 'Interpolate between Base and Lerp'
+                # Lerp.location = (-400, 600)
+                # LerpTex.location (-400, 550)
+                # Lerp.hide = True
+                # LerpTex.hide = True   
+                
+                    
                 mat.node_tree.links.new(BaseTex.outputs['Color'], Arc.inputs['Base'])
                 mat.node_tree.links.new(BaseTex.outputs['Alpha'], Arc.inputs['Base Alpha'])
 
@@ -324,8 +345,13 @@ def ApplyTextures(context, meshObj, TexDrop, CharDrop, TexTypeDrop, BoolShader):
                 BaseTex.image = bpy.data.images.load(base)
                 SssTex.image = bpy.data.images.load(sss)
                 ILMTex.image = bpy.data.images.load(ilm)
-                ILMTex.image.colorspace_settings.name = 'Linear'
+                if bpy.app.version[0] >= 4:
+                    ILMTex.image.colorspace_settings.name = 'Linear Rec.709'
+                else:
+                    ILMTex.image.colorspace_settings.name = 'Linear' 
+                
                 DetailTex.image = bpy.data.images.load(detail)
+            
 
 
 
@@ -463,7 +489,7 @@ class ColorsDrop(bpy.types.PropertyGroup):
             ("HairEff", "Millia Hair Effect", ""),
         ]
     )
-
+    
 class SelectColorFolder(bpy.types.Operator, ImportHelper):
     """Select Folder that contains your Base & ColorXX Folders (Base & ColorXX Folders Must contain Appropriate textures)"""
     bl_idname= "open.color_folder"
@@ -479,7 +505,7 @@ class SelectColorFolder(bpy.types.Operator, ImportHelper):
 
         filename, extension = os.path.splitext(self.filepath)
 
-        GLOBALS.G_ColorDir = self.filepath
+        GLOBALS.G_ColorDir = os.path.join(os.path.dirname(self.filepath),'')
         GLOBALS.G_ColorFolders = [ f.path for f in os.scandir(GLOBALS.G_ColorDir) if f.is_dir() ]
 
         if GLOBALS.G_ColorFolders != None:
@@ -493,7 +519,7 @@ class SelectColorFolder(bpy.types.Operator, ImportHelper):
                     GLOBALS.G_BaseFolder = item
 
         return {"FINISHED"}
-
+        
 # - Texture Tools Panel
 class CA_PT_TexEditPanel(bpy.types.Panel):
     bl_label = "Texture Preview Tools"
